@@ -1,0 +1,12 @@
+#!/usr/bin/env ruby
+
+require_relative '../lib/stl_parser'
+require_relative '../lib/stl_cc'
+require_relative '../lib/stl_graph'
+
+if __FILE__ == $PROGRAM_NAME
+  puts "Parsing file 'data/cube.stl'"
+  p = STLParser.new('data/cube.stl')
+  result = p.parse
+  puts "There are #{result[0]} faces, #{result[1]} corners, and #{result[2]} vertices in this STL File"
+end

@@ -4,7 +4,7 @@ require_relative 'stl_cc'
 
 class STLParser
 
-  attr_reader :file, :f, :graph, :graphs, :triangle, :normal, :vertexs, :num_faces, :num_vertexs
+  attr_reader :file, :f, :graph, :graphs, :triangle, :normal, :corners, :num_faces, :num_vertexs
 
   HANDLERS = {
     facet_handler: true,
@@ -16,7 +16,7 @@ class STLParser
   def initialize(file)
     @file = file
     @f = File.open(file)
-    @vertexs = Hash.new(Array.new) #object that holds vertexs and corresponding normals
+    @corners = Hash.new(Array.new) #object that holds vertexs and corresponding normals
 
     @normal = nil #current facet normal
     @graph = nil #graph for current facet normal
@@ -24,7 +24,8 @@ class STLParser
 
     @triangle = [] #current triangle stored as an array of vertexes
     @num_faces = 0
-    @num_vertexs = 0
+    @num_vertices = 0
+    @num_corners = 0
   end
 
   def print_file_contents
@@ -45,7 +46,7 @@ class STLParser
     end
 
     calculate_results
-    return [@num_faces, @num_vertexs]
+    return [@num_faces, @num_corners, @num_vertices]
   end
 
   private
@@ -54,7 +55,7 @@ class STLParser
     graphs.each do |key, graph|
       @num_faces += find_num_faces(graph)
     end
-    @num_vertexs = find_num_vertexs
+    @num_corners = find_num_corners
   end
 
   def find_num_faces(graph)
@@ -65,10 +66,10 @@ class STLParser
     cc.num_faces #return number of faces for the given normal
   end
 
-  def find_num_vertexs
+  def find_num_corners
     #a vertex is defined by a point that is shared by at least 3 faces
     count = 0
-    @vertexs.each do |vertex, normals_array|
+    @corners.each do |vertex, normals_array|
       count += 1 if normals_array.length >= 3
     end
     count
@@ -95,10 +96,11 @@ class STLParser
 
   def vertex_handler(line) #takes a vertex line and extracts
     line = line.split('vertex ')[1] #extracts xyz coordinates of vertex
-    vertex = parse_vertex(line) #
+    vertex = parse_vertex(line)
     triangle << vertex #stores each vertex in the current triangle instance variable
     #add distinct normals to each vertex
-    vertexs[vertex] += [normal] unless vertexs[vertex].include?(normal)
+    corners[vertex] += [normal] unless corners[vertex].include?(normal)
+    @num_vertices += 1
   end
 
   def outer_handler(line)

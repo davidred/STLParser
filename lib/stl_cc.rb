@@ -7,7 +7,8 @@ class ConnectedComponents
     @vertexs = graph.adjacency.keys #list of vertexs for a given graph
     @visited = Hash.new(false) #keep track of already visited nodes
     @connections = {} #connected components
-    @num_faces = 0
+    @num_faces = 0 #iterator, number of faces equals the number of connected
+    #components for a given normal.
   end
 
   def dfs
